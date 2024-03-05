@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+ xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<body>
+<!-- container table -->
+<table>
+	<tr>
+		<td>Hello ${userName},<br><br>Wellcome to Loan Aggregator Application....</td>
+	</tr><br><br>
+	<tr>
+		<td>Please click on below link to verify email address::::<br></td>
+	</tr>
+	<tr>
+		<td><a href="${verifyLink}" title="Verify Link">Verify Link!</a></td>
+		
+	</tr>
+</table>
+</body>
+</html>

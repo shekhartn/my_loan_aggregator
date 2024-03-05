@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:websocket="http://www.springframework.org/schema/websocket" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:beans="http://www.springframework.org/schema/beans" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:util="http://www.springframework.org/schema/util" xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p" xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+  http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+  http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+  http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.0.xsd
+  http://www.springframework.org/schema/websocket
+  http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+	<!-- this is not the right approach to load the property files in spring boot 
+	 Spring boot has its own set of rules to load the property files bases on profiles
+	 Drawback : We can't override the property files based on profiles,environment...etc 
+	 and also can't update the value when the context is starting
+	 Below bean would be available only after the spring context refresh event.
+	-->
+	<bean id="envProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="singleton" value="true" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="locations">
+			<list>
+				<value>classpath:env.properties</value>
+				<value>classpath:application.properties</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="propertyConfigurer" class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="properties" ref="envProperties" />
+		<!--Below property is added to support Redis container for testing.
+			 Updating the redis port dynamically in the environment through environment abstraction -->
+		<beans:property name="environment" ref="environment"></beans:property>
+	</bean>
+
+	<util:properties id="velocityProperties">
+		<prop key="resource.loader">class</prop>
+		<prop key="class.resource.loader.class">org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader</prop>
+	</util:properties>
+
+	<bean id="velocityEngine" class="org.apache.velocity.app.VelocityEngine">
+		<constructor-arg ref="velocityProperties" />
+	</bean>
+	
+<!--	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix">
+			<value>/WEB-INF/pages/</value>
+		</property>
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>-->
+
+</beans>
