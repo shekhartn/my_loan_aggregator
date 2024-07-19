@@ -137,6 +137,11 @@ public class ConsumerSessionInfo implements Serializable {
 	public void setConsumer(Consumer consumer) {
 		this.consumer = consumer;
 	}
+
+	@Override
+	public String toString() {
+		return "ConsumerSessionInfo [consumerSessionId=" + consumerSessionId + ", sessionToken=" + sessionToken + "]";
+	}
 	
 	
 	

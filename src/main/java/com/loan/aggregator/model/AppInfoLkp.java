@@ -14,7 +14,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -39,6 +38,9 @@ public class AppInfoLkp implements Serializable{
 	
 	@Column(name="registrations")
 	private byte registrations;
+	
+	@Column(name = "end_point_url", nullable = false, length = 500)
+	private String endPointUrl;
 	
 	@OneToMany(mappedBy="appinfolkp", fetch=FetchType.LAZY)
 	private Set<Consumer> consumers;
@@ -133,6 +135,18 @@ public class AppInfoLkp implements Serializable{
 	 */
 	public void setModifiedDate(Date modifiedDate) {
 		this.modifiedDate = modifiedDate;
+	}
+
+	public String getEndPointUrl() {
+		return endPointUrl;
+	}
+
+	public void setEndPointUrl(String endPointUrl) {
+		this.endPointUrl = endPointUrl;
+	}
+
+	public byte getRegistrations() {
+		return registrations;
 	}
 	
 	

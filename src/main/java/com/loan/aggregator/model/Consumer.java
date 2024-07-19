@@ -38,17 +38,20 @@ public class Consumer implements Serializable{
 	@Column(name="consumer_id", unique=true, nullable=false)
 	private BigInteger consumerId;
 	
+	
 	@Column(name="email",nullable=false)
 	private String email;
 	
-	@Column(name="first_name",nullable=false)
-	private String firstName;
-	
-	@Column(name="last_name",nullable=true)
-	private String lastName;
-	
-	@Column(name="phone_number",nullable=false)
-	private String phoneNumer;
+	/*
+	 * @Column(name="first_name",nullable=false) private String firstName;
+	 * 
+	 * @Column(name="last_name",nullable=true) private String lastName;
+	 */
+	/*
+	 * @Column(name="phone_number",nullable=false) private String phoneNumber;
+	 */
+	@Column(name = "cuid", nullable = true, length = 200)
+	private String cuid;
 	
 	@Column(name="email_verified",nullable=false)
 	private byte emailVerified;
@@ -58,6 +61,10 @@ public class Consumer implements Serializable{
 	
 	@Column(name="is_logged_in",nullable=false)
 	private byte isLoggedIn;
+	
+	@Column(name="login_in")
+	private BigInteger loginCount;
+	
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="created_date", nullable=false)
@@ -100,48 +107,6 @@ public class Consumer implements Serializable{
 	 */
 	public void setEmail(String email) {
 		this.email = email;
-	}
-
-	/**
-	 * @return the firstName
-	 */
-	public String getFirstName() {
-		return firstName;
-	}
-
-	/**
-	 * @param firstName the firstName to set
-	 */
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	/**
-	 * @return the lastName
-	 */
-	public String getLastName() {
-		return lastName;
-	}
-
-	/**
-	 * @param lastName the lastName to set
-	 */
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
-	}
-
-	/**
-	 * @return the phoneNumer
-	 */
-	public String getPhoneNumer() {
-		return phoneNumer;
-	}
-
-	/**
-	 * @param phoneNumer the phoneNumer to set
-	 */
-	public void setPhoneNumer(String phoneNumer) {
-		this.phoneNumer = phoneNumer;
 	}
 
 	/**
@@ -262,6 +227,23 @@ public class Consumer implements Serializable{
 		this.consumerSessionLinks = consumerSessionLinks;
 	}
 
+	public String getCuid() {
+		return cuid;
+	}
+
+	public void setCuid(String cuid) {
+		this.cuid = cuid;
+	}
+
+	public BigInteger getLoginCount() {
+		return loginCount;
+	}
+
+	public void setLoginCount(BigInteger loginCount) {
+		this.loginCount = loginCount;
+	}
+
+	
 	
 	
 }

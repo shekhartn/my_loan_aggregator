@@ -21,7 +21,9 @@ public class ConsumerRequest {
 	private String lastName;
 	private String email;
 	private String appId;
-	private String phoneNumer;
+	private String phoneNumber;
+	private String pwd;
+	private String password;
 	
 	
 	
@@ -97,20 +99,43 @@ public class ConsumerRequest {
 
 
 
-	/**
-	 * @return the phoneNumer
-	 */
-	public String getPhoneNumer() {
-		return phoneNumer;
+
+
+
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 
 
 
-	/**
-	 * @param phoneNumer the phoneNumer to set
-	 */
-	public void setPhoneNumer(String phoneNumer) {
-		this.phoneNumer = phoneNumer;
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+	
+	
+
+
+
+	public String getPwd() {
+		return pwd;
+	}
+
+
+
+	public void setPwd(String pwd) {
+		this.pwd = pwd;
+	}
+
+
+
+	public String getPassword() {
+		return password;
+	}
+
+
+
+	public void setPassword(String password) {
+		this.password = password;
 	}
 
 
@@ -126,7 +151,7 @@ public class ConsumerRequest {
 		consumerRequestBuilder.append(", AppId=");
 		consumerRequestBuilder.append(appId);
 		consumerRequestBuilder.append(", PhoneNumer=");
-		consumerRequestBuilder.append(phoneNumer);
+		consumerRequestBuilder.append(phoneNumber);
 		consumerRequestBuilder.append("]");
 		return consumerRequestBuilder.toString();
 	}

@@ -9,13 +9,17 @@ package com.loan.aggregator.response;
 public class ConsumerRegistrationResponseData {
 	private String consumerId;
 
-	private String sessionToken;
-
 	private Boolean existingConsumer = Boolean.FALSE;
 
 	private String fullName;
 	
+	private String phoneNumber;
+	
 	private String token;
+	
+	private String email;
+	
+	private String password;
 
 	/**
 	 * @return the consumerId
@@ -29,20 +33,6 @@ public class ConsumerRegistrationResponseData {
 	 */
 	public void setConsumerId(String consumerId) {
 		this.consumerId = consumerId;
-	}
-
-	/**
-	 * @return the sessionToken
-	 */
-	public String getSessionToken() {
-		return sessionToken;
-	}
-
-	/**
-	 * @param sessionToken the sessionToken to set
-	 */
-	public void setSessionToken(String sessionToken) {
-		this.sessionToken = sessionToken;
 	}
 
 	/**
@@ -86,6 +76,33 @@ public class ConsumerRegistrationResponseData {
 	public void setToken(String token) {
 		this.token = token;
 	}
+
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
 	
 
 }

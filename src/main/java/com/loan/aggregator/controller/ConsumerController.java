@@ -28,6 +28,7 @@ import com.loan.aggregator.manager.ConsumerManager;
 import com.loan.aggregator.model.Consumer;
 import com.loan.aggregator.repository.ConsumerRepository;
 import com.loan.aggregator.request.ConsumerRequest;
+import com.loan.aggregator.request.LoginRequest;
 import com.loan.aggregator.request.RequestHeader;
 import com.loan.aggregator.response.ConsumerRegistrationResponse;
 import com.loan.aggregator.response.Response;
@@ -100,10 +101,6 @@ public class ConsumerController extends BaseController {
 		}
 		
 		System.out.println("Hey Mr/Mrs."+consumerRequest.getFirstName()+" "+consumerRequest.getLastName()+", Your registration is successful!");
-		//consumers.add(consumer);
-		
-		//consumerRepository.save(consumer);
-
 		return (ResponseEntity<ConsumerRegistrationResponse>)restResponse(responseData,request.getMethod());
 	}
 
@@ -115,5 +112,24 @@ public class ConsumerController extends BaseController {
 	public @ResponseBody Consumer updateConsumer(@RequestBody Consumer consumer) {
 		 consumer=consumerRepository.save(consumer);
 		 return consumer;
+	}
+	
+	@PostMapping("/consumers/login")
+	public @ResponseBody ResponseEntity<ConsumerRegistrationResponse> loginConsumer(@RequestBody LoginRequest loginRequest,
+			HttpServletRequest request) {
+		Response responseData=null;
+		RequestHeader requestHeaders=null;
+		try {
+			requestHeaders=createRequestHeaders(request);
+			responseData=consumerManager.login(loginRequest,requestHeaders);
+		} catch (MyLoanAggregatorException exception) {
+			throw new MyLoanAggregatorException(exception.getStatusCode(),exception.getMessage());
+		}
+		catch (Exception exception) {
+			throwMyLoanAggregatorException(requestHeaders);
+		}
+		
+		System.out.println(loginRequest.getEmail()+", Your Login is successful!");
+		return (ResponseEntity<ConsumerRegistrationResponse>)restResponse(responseData,request.getMethod());
 	}
 }

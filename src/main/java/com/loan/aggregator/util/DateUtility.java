@@ -29,4 +29,8 @@ public class DateUtility {
 		long d = diff / ONE_DAY;
 		return d;
 	}
+
+	public static Long getTimeDiffInMilliSecs(Date old, Date now) {
+		return now.getTime()-old.getTime();
+	}
 }
