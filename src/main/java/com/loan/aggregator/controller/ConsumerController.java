@@ -30,6 +30,7 @@ import com.loan.aggregator.repository.ConsumerRepository;
 import com.loan.aggregator.request.ConsumerRequest;
 import com.loan.aggregator.request.LoginRequest;
 import com.loan.aggregator.request.RequestHeader;
+import com.loan.aggregator.response.ConsumerLoginResponse;
 import com.loan.aggregator.response.ConsumerRegistrationResponse;
 import com.loan.aggregator.response.Response;
 import com.loan.aggregator.util.CommonConstants;
@@ -115,7 +116,7 @@ public class ConsumerController extends BaseController {
 	}
 	
 	@PostMapping("/consumers/login")
-	public @ResponseBody ResponseEntity<ConsumerRegistrationResponse> loginConsumer(@RequestBody LoginRequest loginRequest,
+	public @ResponseBody ResponseEntity<ConsumerLoginResponse> loginConsumer(@RequestBody LoginRequest loginRequest,
 			HttpServletRequest request) {
 		Response responseData=null;
 		RequestHeader requestHeaders=null;
@@ -130,6 +131,6 @@ public class ConsumerController extends BaseController {
 		}
 		
 		System.out.println(loginRequest.getEmail()+", Your Login is successful!");
-		return (ResponseEntity<ConsumerRegistrationResponse>)restResponse(responseData,request.getMethod());
+		return (ResponseEntity<ConsumerLoginResponse>)restResponse(responseData,request.getMethod());
 	}
 }
