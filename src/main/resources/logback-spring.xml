@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<jmxConfigurator></jmxConfigurator>
+	<include resource="org/springframework/boot/logging/logback/defaults.xml"></include>
+	<springProperty scope="context" name="springAppName"
+		source="spring.application.name"></springProperty>
+	<property name="PATTERN"
+		value="date=%date{ISO8601} severity=%-5level service=${springAppName:-} X-Amzn-Trace-Id=%X{trace_id:-} X-App-Id=%X{appId:-} X-ConsumerId=%X{consumerId:-}  pid=${PID:-} thread=%thread logger=%logger{36} message=%msg%n "></property>
+	<property name="PATH" value="log"></property>
+	<!--Including mas logback appender from mpl-util project"-->
+	<property name="APP_NAME" value="loanaggregator"></property>
+
+	<property name="FIELD_TO_MASK"
+		value="cardNumber|client[_-\s]?secret|refresh[_-\s]?token|access[_-\s]?token|client_?id"></property>
+	<property name="FIELD_TO_HASH" value="email[_-\s]?address|userName|email"></property>
+	<property name="PII_TO_MASK"
+		value="nameOnCard|nickName|fullName|displayName|firstName|lastName|streetAddress|locality|region|postalCode|country"></property>
+	<property name="FIELD_TO_REMOVE"
+		value="password|client[_-\s]?secret?|secret"></property>
+
+
+	<appender name="ALL_FILE"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${PATH}/${APP_NAME}.log</file>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<!-- rollover daily -->
+			<fileNamePattern>${PATH}/${APP_NAME}-%d{yyyy-MM-dd}.zip</fileNamePattern>
+			<!-- Keep no more than 1 days data. -->
+			<maxHistory>10</maxHistory>
+		</rollingPolicy>
+
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout
+				class="com.loan.aggregator.logmasking.MaskingActionPatternLayout">
+				<maskingActionPattern
+					class="com.loan.aggregator.logmasking.MaskingActionPattern">
+					<pattern>
+						(?&lt;=(${FIELD_TO_HASH})[\s-:=\"]++)([\x20-\xA8\xC0-\xFF])+?@\w+([-.]\w+)*\.\w+([-.]\w+)*</pattern>
+					<action>SHA_256</action>
+					<enabled>false</enabled>
+				</maskingActionPattern>
+				<maskingActionPattern
+					class="com.loan.aggregator.logmasking.MaskingActionPattern">
+					<pattern>
+						((${FIELD_TO_REMOVE})[\s\-:=\"]+)[\x20-\xA8\xC0-\xFF]{8,30}?[\",\s]</pattern>
+					<action>REMOVE</action>
+					<enabled>false</enabled>
+				</maskingActionPattern>
+
+				<maskingActionPattern
+					class="com.loan.aggregator.logmasking.MaskingActionPattern">
+					<pattern>
+						(?&lt;=(${PII_TO_MASK})[\s\-:=\"]++)[\x20-\xA8\xC0-\xFF]+?(?=[\",\s])</pattern>
+					<action>MASK_STAR</action>
+					<enabled>false</enabled>
+				</maskingActionPattern>
+
+
+				<maskingActionPattern
+					class="com.loan.aggregator.logmasking.MaskingActionPattern">
+					<pattern>(?&lt;=(${FIELD_TO_MASK})\W+)\w+</pattern>
+					<action>MASK_STAR</action>
+					<enabled>false</enabled>
+				</maskingActionPattern>
+				<pattern>${PATTERN}</pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<logger name="com.loan.aggregator" level="DEBUG" additivity="false">
+		<appender-ref ref="ALL_FILE"></appender-ref>
+
+	</logger>
+	<root level="INFO">
+		<appender-ref ref="ALL_FILE"></appender-ref>
+	</root>
+	
+</configuration>

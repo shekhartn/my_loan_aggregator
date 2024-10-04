@@ -5,6 +5,5 @@ create table "appinfolkp" (
         "modified_date" timestamp(6) not null,
         "registrations" tinyint default 1,
         "end_point_url" varchar(500) not null,
-        primary key ("app_info_lkp_id")
-    );
+        primary key ("app_info_lkp_id"));
 insert into "appinfolkp"("app_id","created_date","modified_date","registrations","end_point_url")  values('ESSO_UK','2024-02-29','2024-02-29',1,'http://localhost:8585');

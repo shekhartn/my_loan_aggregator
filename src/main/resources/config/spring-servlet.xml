@@ -41,6 +41,35 @@
 		<constructor-arg ref="velocityProperties" />
 	</bean>
 	
+	<bean id="loanAggregatorTask" class="com.loan.aggregator.cron.LoanAggregatorJobManager"></bean>
+
+	<bean name="loanAggregatorJob" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="jobClass" value="com.loan.aggregator.cron.LoanAggregatorJob" />
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="loanAggregatorTask" value-ref="loanAggregatorTask" />
+			</map>
+		</property>
+		<property name="durability" value="true" />
+	</bean>
+	<bean id="loanAggregatorTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="loanAggregatorJob" />
+		<property name="cronExpression" value="${loanaggregator.cronexpression}" />
+	</bean>
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobDetails">
+			<list>
+				<ref bean="loanAggregatorJob" />
+			</list>
+		</property>
+
+		<property name="triggers">
+			<list>
+				<ref bean="loanAggregatorTrigger" />
+			</list>
+		</property>
+	</bean>
+	
 <!--	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix">
 			<value>/WEB-INF/pages/</value>

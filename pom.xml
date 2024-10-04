@@ -124,6 +124,23 @@
 			<artifactId>commons-collections4</artifactId>
 			<version>4.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.quartz-scheduler</groupId>
+			<artifactId>quartz</artifactId>
+			</dependency>
+		<!--<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-quartz</artifactId>
+		</dependency>-->
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-websocket</artifactId>
+		</dependency>
 
 	</dependencies>
 
@@ -159,7 +176,7 @@
 						</compilerArg>
 						<arg>
 							-Amapstruct.verbose=true,
-				 		</arg>
+						</arg>
 						<compilerArg>
 							-Xdiags:verbose
 						</compilerArg>

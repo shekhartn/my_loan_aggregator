@@ -4,6 +4,7 @@
 package com.loan.aggregator.manager;
 
 
+
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +15,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,7 @@ import com.loan.aggregator.client.LoanAggregatorClientService;
 import com.loan.aggregator.client.bo.Customer;
 import com.loan.aggregator.client.request.mapper.CustomerRequestMapper;
 import com.loan.aggregator.exception.MyLoanAggregatorException;
+import com.loan.aggregator.mapper.ConsumerMapper;
 import com.loan.aggregator.model.AppInfoLkp;
 import com.loan.aggregator.model.Consumer;
 import com.loan.aggregator.model.ConsumerSessionInfo;
@@ -42,7 +46,6 @@ import com.loan.aggregator.response.ConsumerRegistrationResponseData;
 import com.loan.aggregator.response.Response;
 import com.loan.aggregator.util.CommonConstants;
 import com.loan.aggregator.util.DateUtility;
-import com.loan.aggregator.util.HashingUtil;
 import com.loan.aggregator.util.MessageUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,6 +55,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @Service
 public class ConsumerManager extends BaseManager {
+	
+	private static final Logger log = LoggerFactory.getLogger(ConsumerManager.class);
 	
 	@Autowired
 	private ConsumerRepository consumerRepository;
@@ -85,7 +90,7 @@ public class ConsumerManager extends BaseManager {
 		boolean isRegistered;
 		Consumer consumer;
 		synchronized (this) {
-			System.out.println("registerConsumer ThreadName Start :" + Thread.currentThread().getName());
+			log.info("registerConsumer ThreadName Start :",Thread.currentThread().getName());
 			if(appInfoLkp.isRegistrations()!=CommonConstants.BYTE_ONE && CommonConstants.ESSO_UK.equals(appId)) {
 				response.setStatusCode(String.valueOf(HttpStatus.CONFLICT.value()));
 				response.setMessage(MessageUtil.getMessage(appId.toLowerCase()+"."+CommonConstants.CONSUMER_REGISTRATION_NOTALLOWED));
@@ -95,14 +100,16 @@ public class ConsumerManager extends BaseManager {
 			isRegistered=isEmailAlreadyRegisted(consumerRequest.getEmail(),appInfoLkp);
 			if(!isRegistered) {
 				consumer=createConsumer(consumerRequest,appInfoLkp);
+				String token=getToken();
+				createConsumerSessionLink(consumer,CommonConstants.EMAIL_VERIFICATION,token);
+				consumerRepository.save(consumer);
 				if(consumer.getConsumerId()!=null) {
 					ConsumerRegistrationResponseData consumerResponse=new ConsumerRegistrationResponseData();
 					consumerResponse.setConsumerId(consumer.getConsumerId()!=null?consumer.getConsumerId().toString():null);
 					response.setStatusCode(CommonConstants.SUCCESS_CODE);
 					response.setMessage(getMessage(appId.toLowerCase() + ".consumer.reg.message"));
-					sendWelcomeEmail(consumer,appInfoLkp);
-					ConsumerSessionLink consumerSessionLink=sessionlnkDao.findByConsumerAndTypeAndDeleteFlag(consumer, "Email Verification", (byte)0);
-					consumerResponse.setToken(consumerSessionLink!=null?consumerSessionLink.getSecretToken():null);
+					sendWelcomeEmail(consumer,appInfoLkp,token);
+					consumerResponse.setToken(token);
 					consumerRequest.setPassword(getSecurePassword(consumer, consumerRequest.getPwd()));
 					//Client call
 					try {
@@ -116,6 +123,7 @@ public class ConsumerManager extends BaseManager {
 							consumerRepository.save(consumer);
 						}
 						response.setResponseData(consumerResponse);
+						log.info("registerConsumer ThreadName End :" + Thread.currentThread().getName());
 						return response;
 					} catch (MyLoanAggregatorException e) {
 						throw new MyLoanAggregatorException(CommonConstants.CUSTOM_ERROR_CODE,
@@ -123,20 +131,18 @@ public class ConsumerManager extends BaseManager {
 					}
 				}
 			}else {
-				response.setStatusCode(String.valueOf(HttpStatus.CONFLICT.value()));
-				response.setMessage(MessageUtil.getMessage(appId.toLowerCase()+"."+CommonConstants.CONSUMER_ALREADY_REGISTERED));
-				return response;
+				throw new MyLoanAggregatorException(String.valueOf(HttpStatus.CONFLICT.value()),
+						MessageUtil.getMessage(MessageUtil.getMessage(appId.toLowerCase()+"."+CommonConstants.CONSUMER_ALREADY_REGISTERED)));
+//				response.setStatusCode(String.valueOf(HttpStatus.CONFLICT.value()));
+//				response.setMessage(MessageUtil.getMessage(appId.toLowerCase()+"."+CommonConstants.CONSUMER_ALREADY_REGISTERED));
+//				return response;
 			}
-			System.out.println("registerConsumer ThreadName End :" + Thread.currentThread().getName());
 		}
 		throw new MyLoanAggregatorException(CommonConstants.CUSTOM_ERROR_CODE,
 				MessageUtil.getMessage(CommonConstants.TECHNICAL_ERROR));
 	}
 
-	private void sendWelcomeEmail(Consumer consumer, AppInfoLkp appInfoLkp)throws MyLoanAggregatorException{
-		String token=getToken();
-		createConsumerSessionLink(consumer,CommonConstants.EMAIL_VERIFICATION,token);
-		consumerRepository.save(consumer);
+	private void sendWelcomeEmail(Consumer consumer, AppInfoLkp appInfoLkp,String token)throws MyLoanAggregatorException{
 		Map<String,Object> dataMap=createDataMap(consumer,appInfoLkp,token);
 		System.out.println("Email Sent Successfully.....");
 		//taskExecutor.execute(new SendEmailTaskExecutor(dataMap,emailNotification,appInfoLkp.getAppId()));
@@ -165,7 +171,7 @@ public class ConsumerManager extends BaseManager {
 	private ConsumerSessionLink createConsumerSessionLink(Consumer consumer, String type,String token) {
 		ConsumerSessionLink consumersessionlnk = sessionlnkDao.findByConsumerAndTypeAndDeleteFlag(consumer,
 				type, CommonConstants.BYTE_ZERO);
-		if(CommonConstants.EMAIL_VERIFICATION.equals("Email Verification") && consumersessionlnk==null) {
+		if(CommonConstants.EMAIL_VERIFICATION.equals(type) && consumersessionlnk==null) {
 			ConsumerSessionLink sessionlnk=new ConsumerSessionLink();
 			sessionlnk.setConsumer(consumer);
 			sessionlnk.setType(type);
@@ -184,23 +190,17 @@ public class ConsumerManager extends BaseManager {
 	}
 
 	private Consumer createConsumer(ConsumerRequest consumerRequest, AppInfoLkp appInfoLkp) {
-		Consumer consumer=new Consumer();
-		Set<ConsumerSessionInfo> sessions=new HashSet<ConsumerSessionInfo>();
 		if(consumerRequest== null || appInfoLkp==null) {
 			return null;
 		}
-		consumer.setEmail(consumerRequest.getEmail());
-		consumer.setEmailVerified(CommonConstants.BYTE_ZERO);
-		consumer.setIsActive(CommonConstants.BYTE_ONE);
-		consumer.setIsLoggedIn(CommonConstants.BYTE_ZERO);
+		Consumer consumer=ConsumerMapper.mapToConsumer(consumerRequest);
 		consumer.setAppinfolkp(appInfoLkp);
-		consumer.setLoginCount(new BigInteger(String.valueOf(0)));
 		consumerRequest.setAppId(appInfoLkp.getAppId());
-		consumer.setCreatedDate(DateUtility.getCalendarInUTCZone().getTime());
-		consumer.setModifiedDate(DateUtility.getCalendarInUTCZone().getTime());
+		
 		consumer=consumerRepository.save(consumer);
 		
 		ConsumerSessionInfo sessionDetails=sessionDao.save(getConsumerSession(consumer));
+		Set<ConsumerSessionInfo> sessions=new HashSet<ConsumerSessionInfo>();
 		sessions.add(sessionDetails);
 		consumer.setConsumerSessionInfo(sessions);
 		

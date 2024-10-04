@@ -3,8 +3,6 @@
  */
 package com.loan.aggregator.util;
 
-import com.loan.aggregator.model.AppInfoLkp;
-
 /**
  * 
  */
@@ -38,5 +36,6 @@ public class CommonConstants {
 	public static final String SMS_FAILURE_MESSAGE = "sms.failure";
 	public static final String MESSAGE_PROP = "message";
 	public static final String WEBVIEW_SUCCESS = "webpage.";
+	public static final String CONSUMER_ID = "consumerId";
 	
 }
